@@ -4,7 +4,7 @@
 //!
 //! Core Domain Concept:
 //!
-//! ## Invoice: 
+//! ## Invoice:
 //! It is the core entity and represent the bill for hotel services
 //! It contains:
 //! - Id: Unique identifier.

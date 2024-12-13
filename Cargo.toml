@@ -12,3 +12,4 @@ name = "innvoice"
 path = "src/main.rs"
 
 [dependencies]
+mockall = "0.13.1"
