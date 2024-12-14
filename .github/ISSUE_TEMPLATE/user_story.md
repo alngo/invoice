@@ -1,6 +1,6 @@
 ---
 name: User Story
-about: ''
+about: 'Booking software'
 title: ''
 labels: ''
 assignees: ''
