@@ -1,33 +1,12 @@
 //! # Domain
 //!
-//! The domain of an invoice generator for a hotel.
+//! The domain is a booking service.
+//! The owner can create a resource and set the availability of the resource.
 //!
-//! Core Domain Concept:
+//! The resource booking service is a service that allows owners to create resources and set the
+//! availability of the resource. The user can book the resource for a specific time slot.
+//! The owner of the resource can create a resource and set the availability of the resource.
+//! The user can book the resource for a specific time slot.
 //!
-//! ## Invoice:
-//! It is the core entity and represent the bill for hotel services
-//! It contains:
-//! - Id: Unique identifier.
-//! - Date: Date of creations.
-//! - Guest: Associated Guest informations.
-//! - Services: List of services billed (rooms, breakfasts, lunch, dinner, etc...)
-//! - Total Amount: Calculated total cost
-//! - Payment Status: Indicates whether the invoice is paid or unpaid
-//!
-//! ## Guest:
-//! It represent a hotel guest and contains:
-//! - Id: Unique identifier
-//! - Name: Guest's name
-//! - Contact information:
-//!   - Address
-//!   - Phone
-//!   - Email
-//!
-//! ## Services:
-//! It represent a single service on the invoice
-//! - Description
-//! - Quantity
-//! - Price
-//! - Payment Status
-//!
+mod owner;
 mod shared;

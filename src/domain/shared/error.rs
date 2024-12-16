@@ -23,13 +23,13 @@ mod domain_error_tests {
         let errors = vec!["error1", "error2", "error3"];
 
         let error = DomainError {
-            message: format!("An error message"),
+            message: "An error message".to_string(),
         };
         assert_eq!("An error message", format!("{}", error));
 
         for value in errors {
             let domain_error = DomainError {
-                message: format!("{}", value),
+                message: value.to_string(),
             };
             assert_eq!(format!("{}", value), format!("{}", domain_error));
         }

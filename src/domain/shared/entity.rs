@@ -36,7 +36,7 @@ mod domain_entity_tests {
         rule.expect_is_valid().times(1).returning(|| false);
         rule.expect_message()
             .times(1)
-            .returning(|| format!("An error message"));
+            .returning(|| "An error message".to_string());
         let result = ConcreteEntity::check_rule(rule);
         assert!(result.is_err())
     }
