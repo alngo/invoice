@@ -1,9 +1,19 @@
 use super::{
     email::Email,
     resource::{Price, ResourceId},
+    OwnerId,
 };
 
 pub enum OwnerCommand {
+    CreateOwner {
+        name: String,
+        email: Email,
+    },
+    UpdateOwner {
+        id: OwnerId,
+        name: String,
+        email: Email,
+    },
     AddResource {
         name: String,
         description: String,
@@ -17,11 +27,5 @@ pub enum OwnerCommand {
     },
     RemoveResource {
         resource_id: ResourceId,
-    },
-    UpdateName {
-        name: String,
-    },
-    UpdateEmail {
-        email: Email,
     },
 }

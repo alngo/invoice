@@ -2,6 +2,7 @@ mod price;
 mod repository;
 
 pub use price::Price;
+pub use repository::ResourceRepository;
 
 pub type ResourceId = uuid::Uuid;
 
@@ -25,5 +26,9 @@ impl Resource {
 
     pub fn id(&self) -> &ResourceId {
         &self.id
+    }
+
+    pub fn name(&self) -> &String {
+        &self.name
     }
 }
