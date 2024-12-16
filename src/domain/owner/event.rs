@@ -1,14 +1,12 @@
-use super::{email::Email, resource::ResourceId, OwnerId, Price};
+use super::{resource::ResourceId, OwnerId, Price};
 
 pub enum OwnerEvent {
     OwnerCreated {
         id: OwnerId,
         name: String,
-        email: Email,
     },
     OwnerUpdated {
         name: String,
-        email: Email,
     },
     ResourceAdded {
         resource_id: ResourceId,

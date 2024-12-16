@@ -17,6 +17,6 @@ impl<'a, 'b> Rule for OwnerIdMustMatch<'a, 'b> {
     }
 
     fn message(&self) -> String {
-        format!("OwnerId must match.",)
+        "OwnerId must match.".to_string()
     }
 }

@@ -9,7 +9,7 @@ impl Price {
     pub fn from_f32(value: f32) -> Result<Self, DomainError> {
         if value < 0.0 {
             return Err(DomainError {
-                message: format!("Price cannot be negative"),
+                message: "Price cannot be negative".to_string(),
             });
         }
         Ok(Self(Decimal::from_f32(value).unwrap()))

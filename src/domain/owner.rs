@@ -1,5 +1,4 @@
 mod command;
-mod email;
 mod event;
 mod repository;
 mod resource;
@@ -7,7 +6,6 @@ mod rules;
 
 use super::shared::{aggregate::Aggregate, entity::Entity, error::DomainError};
 pub use command::OwnerCommand;
-pub use email::Email;
 pub use event::OwnerEvent;
 pub use resource::*;
 use rules::{OwnerIdMustMatch, OwnerMustOwnTheResource, ResourceNameMustBeUnique};
@@ -18,7 +16,6 @@ pub type OwnerId = uuid::Uuid;
 pub struct Owner {
     id: OwnerId,
     name: String,
-    email: Email,
     resources: Vec<Resource>,
 }
 
@@ -30,13 +27,13 @@ impl Aggregate for Owner {
 
     fn handle(&self, command: Self::Command) -> Result<Vec<Self::Event>, DomainError> {
         match command {
-            OwnerCommand::CreateOwner { name, email } => {
+            OwnerCommand::CreateOwner { name } => {
                 let id = OwnerId::now_v7();
-                Ok(vec![OwnerEvent::OwnerCreated { id, name, email }])
+                Ok(vec![OwnerEvent::OwnerCreated { id, name }])
             }
-            OwnerCommand::UpdateOwner { id, name, email } => {
+            OwnerCommand::UpdateOwner { id, name } => {
                 Self::check_rule(OwnerIdMustMatch::new(&self.id, &id))?;
-                Ok(vec![OwnerEvent::OwnerUpdated { name, email }])
+                Ok(vec![OwnerEvent::OwnerUpdated { name }])
             }
             OwnerCommand::AddResource {
                 name,
@@ -45,7 +42,12 @@ impl Aggregate for Owner {
             } => {
                 let resource_id = ResourceId::now_v7();
                 Self::check_rule(ResourceNameMustBeUnique::new(&name, &self.resources))?;
-                Ok(vec![OwnerEvent::ResourceAdded { resource_id, name, description, price }])
+                Ok(vec![OwnerEvent::ResourceAdded {
+                    resource_id,
+                    name,
+                    description,
+                    price,
+                }])
             }
             OwnerCommand::UpdateResource {
                 resource_id,
@@ -55,7 +57,12 @@ impl Aggregate for Owner {
             } => {
                 Self::check_rule(OwnerMustOwnTheResource::new(&resource_id, &self.resources))?;
                 Self::check_rule(ResourceNameMustBeUnique::new(&name, &self.resources))?;
-                Ok(vec![OwnerEvent::ResourceUpdated { resource_id, name, description, price }])
+                Ok(vec![OwnerEvent::ResourceUpdated {
+                    resource_id,
+                    name,
+                    description,
+                    price,
+                }])
             }
             OwnerCommand::RemoveResource { resource_id } => {
                 Self::check_rule(OwnerMustOwnTheResource::new(&resource_id, &self.resources))?;
@@ -66,26 +73,36 @@ impl Aggregate for Owner {
 
     fn apply(&mut self, event: Self::Event) {
         match event {
-            OwnerEvent::ResourceAdded { resource_id, name, description, price } => {
+            OwnerEvent::ResourceAdded {
+                resource_id,
+                name,
+                description,
+                price,
+            } => {
                 let resource = Resource::new(resource_id, name, description, price);
                 self.resources.push(resource);
             }
-            OwnerEvent::ResourceUpdated { resource_id, name, description, price } => {
+            OwnerEvent::ResourceUpdated {
+                resource_id,
+                name,
+                description,
+                price,
+            } => {
                 let resource = Resource::new(resource_id, name, description, price);
-                self.resources.retain(|resource| resource.id() != &resource_id);
+                self.resources
+                    .retain(|resource| resource.id() != &resource_id);
                 self.resources.push(resource);
             }
             OwnerEvent::ResourceRemoved { resource_id } => {
-                self.resources.retain(|resource| resource.id() != &resource_id);
+                self.resources
+                    .retain(|resource| resource.id() != &resource_id);
             }
-            OwnerEvent::OwnerUpdated { name, email } => {
+            OwnerEvent::OwnerUpdated { name } => {
                 self.name = name;
-                self.email = email;
             }
-            OwnerEvent::OwnerCreated { id, name, email } => {
+            OwnerEvent::OwnerCreated { id, name } => {
                 self.id = id;
                 self.name = name;
-                self.email = email;
             }
         }
     }

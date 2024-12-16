@@ -1,5 +1,4 @@
 use super::{
-    email::Email,
     resource::{Price, ResourceId},
     OwnerId,
 };
@@ -7,12 +6,10 @@ use super::{
 pub enum OwnerCommand {
     CreateOwner {
         name: String,
-        email: Email,
     },
     UpdateOwner {
         id: OwnerId,
         name: String,
-        email: Email,
     },
     AddResource {
         name: String,

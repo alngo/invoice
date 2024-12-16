@@ -1,4 +1,7 @@
-use crate::domain::{owner::{Resource, ResourceId}, shared::rule::Rule};
+use crate::domain::{
+    owner::{Resource, ResourceId},
+    shared::rule::Rule,
+};
 
 pub struct OwnerMustOwnTheResource<'a, 'b> {
     resource_id: &'a ResourceId,
@@ -16,7 +19,9 @@ impl<'a, 'b> OwnerMustOwnTheResource<'a, 'b> {
 
 impl<'a, 'b> Rule for OwnerMustOwnTheResource<'a, 'b> {
     fn is_valid(&self) -> bool {
-        self.owner_resources.iter().find(|resource| resource.id() == self.resource_id).is_some()
+        self.owner_resources
+            .iter()
+            .any(|resource| resource.id() == self.resource_id)
     }
 
     fn message(&self) -> String {
