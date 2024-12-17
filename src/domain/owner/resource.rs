@@ -1,5 +1,4 @@
 mod price;
-mod repository;
 
 pub use price::Price;
 

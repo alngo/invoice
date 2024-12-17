@@ -1,4 +1,4 @@
-use crate::domain::{owner::Resource, shared::rule::Rule};
+use crate::domain::{owner::Resource, shared::Rule};
 
 pub struct ResourceNameMustBeUnique<'a, 'b> {
     name: &'a String,
@@ -16,8 +16,10 @@ impl<'a, 'b> ResourceNameMustBeUnique<'a, 'b> {
 
 impl<'a, 'b> Rule for ResourceNameMustBeUnique<'a, 'b> {
     fn is_valid(&self) -> bool {
-        !self.owner_resources
-            .iter().any(|resource| resource.name() == self.name)
+        !self
+            .owner_resources
+            .iter()
+            .any(|resource| resource.name() == self.name)
     }
 
     fn message(&self) -> String {

@@ -1,6 +1,6 @@
 use rust_decimal::{prelude::FromPrimitive, Decimal};
 
-use crate::domain::shared::error::DomainError;
+use crate::domain::shared::DomainError;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Price(Decimal);

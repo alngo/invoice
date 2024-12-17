@@ -8,5 +8,5 @@
 //! The owner of the resource can create a resource and set the availability of the resource.
 //! The user can book the resource for a specific time slot.
 //!
-mod owner;
-mod shared;
+pub mod owner;
+pub mod shared;

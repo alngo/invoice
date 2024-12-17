@@ -1,10 +1,9 @@
 mod command;
 mod event;
-mod repository;
 mod resource;
 mod rules;
 
-use super::shared::{aggregate::Aggregate, entity::Entity, error::DomainError};
+use super::shared::{Aggregate, DomainError, Entity};
 pub use command::OwnerCommand;
 pub use event::OwnerEvent;
 pub use resource::*;
@@ -18,6 +17,15 @@ pub struct Owner {
     name: String,
     resources: Vec<Resource>,
 }
+impl Owner {
+    pub fn id(&self) -> &OwnerId {
+        &self.id
+    }
+
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+}
 
 impl Entity for Owner {}
 
@@ -29,7 +37,10 @@ impl Aggregate for Owner {
         match command {
             OwnerCommand::CreateOwner { name } => {
                 let id = OwnerId::now_v7();
-                Ok(vec![OwnerEvent::OwnerCreated { id, name }])
+                Ok(vec![OwnerEvent::OwnerCreated {
+                    id,
+                    name: name.to_string(),
+                }])
             }
             OwnerCommand::UpdateOwner { id, name } => {
                 Self::check_rule(OwnerIdMustMatch::new(&self.id, &id))?;
@@ -73,6 +84,13 @@ impl Aggregate for Owner {
 
     fn apply(&mut self, event: Self::Event) {
         match event {
+            OwnerEvent::OwnerCreated { id, name } => {
+                self.id = id;
+                self.name = name;
+            }
+            OwnerEvent::OwnerUpdated { name } => {
+                self.name = name;
+            }
             OwnerEvent::ResourceAdded {
                 resource_id,
                 name,
@@ -96,13 +114,6 @@ impl Aggregate for Owner {
             OwnerEvent::ResourceRemoved { resource_id } => {
                 self.resources
                     .retain(|resource| resource.id() != &resource_id);
-            }
-            OwnerEvent::OwnerUpdated { name } => {
-                self.name = name;
-            }
-            OwnerEvent::OwnerCreated { id, name } => {
-                self.id = id;
-                self.name = name;
             }
         }
     }
