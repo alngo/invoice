@@ -8,11 +8,7 @@ use mockall::automock;
 #[cfg_attr(test, automock)]
 #[async_trait(?Send)]
 pub trait OwnerRepository {
-    async fn add(&self, owner: Owner) -> Result<(), ApplicationError>;
-    async fn update(&self, owner: Owner) -> Result<(), ApplicationError>;
-    async fn remove(&self, owner_id: OwnerId) -> Result<(), ApplicationError>;
-    async fn find(&self, owner_id: OwnerId) -> Result<(), ApplicationError>;
-    async fn find_by_name(&self, name: String) -> Result<(), ApplicationError>;
-    async fn find_all(&self) -> Result<(), ApplicationError>;
+    async fn next_id(&self) -> Result<OwnerId, ApplicationError>;
+    async fn find_by_id(&self, owner_id: OwnerId) -> Result<Owner, ApplicationError>;
     async fn store(&self, events: Vec<OwnerEvent>) -> Result<(), ApplicationError>;
 }
