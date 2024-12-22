@@ -1,6 +1,6 @@
 use crate::domain::{
     owner::{Resource, ResourceId},
-    shared::rule::Rule,
+    shared::Rule,
 };
 
 pub struct OwnerMustOwnTheResource<'a, 'b> {

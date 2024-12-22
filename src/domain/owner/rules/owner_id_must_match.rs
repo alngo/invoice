@@ -1,4 +1,4 @@
-use crate::domain::{owner::OwnerId, shared::rule::Rule};
+use crate::domain::{owner::OwnerId, shared::Rule};
 
 pub struct OwnerIdMustMatch<'a, 'b> {
     left: &'a OwnerId,
