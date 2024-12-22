@@ -5,7 +5,10 @@ use crate::{
         owner::{repository::OwnerRepository, resource::repository::ResourceRepository},
         shared::{error::ApplicationError, use_case::UseCase},
     },
-    domain::{owner::{OwnerCommand, OwnerId, Price, ResourceId}, shared::Aggregate},
+    domain::{
+        owner::{OwnerCommand, OwnerId, Price, ResourceId},
+        shared::Aggregate,
+    },
 };
 
 pub struct Request<'a> {
@@ -50,15 +53,52 @@ where
 
     async fn execute(&self, request: Request<'a>) -> Result {
         let owner = self.owner_repository.find_by_id(*request.owner_id).await?;
+        let id = self.resource_repository.next_id().await?;
         let command = OwnerCommand::AddResource {
+            id,
             name: request.name.to_string(),
             description: request.description.to_string(),
             price: request.price,
         };
         let events = owner.handle(command)?;
+        let id = self.resource_repository.next_id().await?;
         self.owner_repository.store(events).await?;
-        Ok(Response {
-            resource_id: resource.id,
-        })
+        Ok(Response { resource_id: id })
+    }
+}
+
+#[cfg(test)]
+mod owner_use_case_add_resource_tests {
+    use super::*;
+    use crate::{
+        application::owner::{
+            repository::MockOwnerRepository, resource::repository::MockResourceRepository,
+        },
+        domain::owner::Owner,
+    };
+
+    #[tokio::test]
+    async fn add_resource() {
+        let mut owner_repository = MockOwnerRepository::new();
+        owner_repository
+            .expect_find_by_id()
+            .returning(|_| Ok(Owner::default()));
+        owner_repository.expect_store().returning(|_| Ok(()));
+        let mut resource_repository = MockResourceRepository::new();
+        resource_repository
+            .expect_next_id()
+            .returning(|| Ok(ResourceId::default()));
+        let use_case = AddResource::new(&owner_repository, &resource_repository);
+
+        let request = Request {
+            owner_id: &OwnerId::default(),
+            name: "resource_name",
+            description: "resource_description",
+            price: Price::from_f32(100.00).unwrap(),
+        };
+
+        let response = use_case.execute(request).await.unwrap();
+
+        assert_eq!(response.resource_id, ResourceId::default());
     }
 }

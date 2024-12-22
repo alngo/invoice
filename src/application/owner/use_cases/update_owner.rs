@@ -44,14 +44,14 @@ where
 
     async fn execute(&self, request: Request<'a>) -> Result {
         let command = OwnerCommand::UpdateOwner {
-            id: request.id.clone(),
+            id: *request.id,
             name: request.name.to_string(),
         };
-        let owner = self.owner_repository.find_by_id(request.id.clone()).await?;
+        let owner = self.owner_repository.find_by_id(*request.id).await?;
         let events = owner.handle(command)?;
         self.owner_repository.store(events).await?;
         Ok(Response {
-            id: request.id.clone(),
+            id: *request.id,
         })
     }
 }
@@ -59,7 +59,10 @@ where
 #[cfg(test)]
 mod owner_use_case_update_owner_tests {
     use super::*;
-    use crate::{application::owner::repository::MockOwnerRepository, domain::owner::OwnerEvent};
+    use crate::{
+        application::owner::repository::MockOwnerRepository,
+        domain::owner::{Owner, OwnerEvent},
+    };
 
     #[tokio::test]
     async fn test_update_owner() {

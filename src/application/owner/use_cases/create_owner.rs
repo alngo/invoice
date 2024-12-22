@@ -42,7 +42,9 @@ where
     type Response = Response;
 
     async fn execute(&self, request: Request<'a>) -> Result {
+        let id = self.owner_repository.next_id().await?;
         let command = OwnerCommand::CreateOwner {
+            id,
             name: request.name.to_string(),
         };
         let owner = Owner::default();
@@ -57,7 +59,10 @@ where
 #[cfg(test)]
 mod owner_use_case_create_owner_tests {
     use super::*;
-    use crate::{application::owner::repository::MockOwnerRepository, domain::owner::OwnerEvent};
+    use crate::{
+        application::owner::repository::MockOwnerRepository,
+        domain::owner::{OwnerEvent, OwnerId},
+    };
 
     #[tokio::test]
     async fn test_create_owner() {
@@ -67,6 +72,9 @@ mod owner_use_case_create_owner_tests {
             assert!(matches!(&events[0], OwnerEvent::OwnerCreated { .. }));
             Ok(())
         });
+        owner_repository
+            .expect_next_id()
+            .returning(|| Ok(OwnerId::default()));
 
         let use_case = CreateOwner::new(&owner_repository);
         let request = Request { name: "owner" };
@@ -77,6 +85,9 @@ mod owner_use_case_create_owner_tests {
     #[tokio::test]
     async fn test_create_owner_error() {
         let mut owner_repository = MockOwnerRepository::new();
+        owner_repository
+            .expect_next_id()
+            .returning(|| Ok(OwnerId::default()));
         owner_repository.expect_store().returning(|_| {
             Err(ApplicationError {
                 message: String::from("error"),

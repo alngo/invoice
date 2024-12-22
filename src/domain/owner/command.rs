@@ -5,6 +5,7 @@ use super::{
 
 pub enum OwnerCommand {
     CreateOwner {
+        id: OwnerId,
         name: String,
     },
     UpdateOwner {
@@ -12,6 +13,7 @@ pub enum OwnerCommand {
         name: String,
     },
     AddResource {
+        id: ResourceId,
         name: String,
         description: String,
         price: Price,

@@ -7,7 +7,9 @@ use super::shared::{Aggregate, DomainError, Entity};
 pub use command::OwnerCommand;
 pub use event::OwnerEvent;
 pub use resource::*;
-use rules::{OwnerIdMustMatch, OwnerMustOwnTheResource, ResourceNameMustBeUnique};
+use rules::{
+    OwnerIdMustMatch, OwnerMustOwnTheResource, ResourceIdMustBeUnique, ResourceNameMustBeUnique,
+};
 
 pub type OwnerId = uuid::Uuid;
 
@@ -35,24 +37,23 @@ impl Aggregate for Owner {
 
     fn handle(&self, command: Self::Command) -> Result<Vec<Self::Event>, DomainError> {
         match command {
-            OwnerCommand::CreateOwner { name } => {
-                let id = OwnerId::now_v7();
-                Ok(vec![OwnerEvent::OwnerCreated {
-                    id,
-                    name: name.to_string(),
-                }])
-            }
+            OwnerCommand::CreateOwner { id, name } => Ok(vec![OwnerEvent::OwnerCreated {
+                id,
+                name: name.to_string(),
+            }]),
             OwnerCommand::UpdateOwner { id, name } => {
                 Self::check_rule(OwnerIdMustMatch::new(&self.id, &id))?;
                 Ok(vec![OwnerEvent::OwnerUpdated { name }])
             }
             OwnerCommand::AddResource {
+                id,
                 name,
                 description,
                 price,
             } => {
                 let resource_id = ResourceId::now_v7();
                 Self::check_rule(ResourceNameMustBeUnique::new(&name, &self.resources))?;
+                Self::check_rule(ResourceIdMustBeUnique::new(&id, &self.resources))?;
                 Ok(vec![OwnerEvent::ResourceAdded {
                     resource_id,
                     name,
