@@ -50,9 +50,7 @@ where
         let owner = self.owner_repository.find_by_id(*request.id).await?;
         let events = owner.handle(command)?;
         self.owner_repository.store(events).await?;
-        Ok(Response {
-            id: *request.id,
-        })
+        Ok(Response { id: *request.id })
     }
 }
 
