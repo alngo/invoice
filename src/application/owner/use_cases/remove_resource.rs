@@ -16,7 +16,9 @@ pub struct Request<'a> {
     pub resource_id: &'a ResourceId,
 }
 
-pub struct Response {}
+pub struct Response {
+    pub resource_id: ResourceId,
+}
 
 pub type Result = core::result::Result<Response, ApplicationError>;
 
@@ -54,7 +56,9 @@ where
         };
         let events = owner.handle(command)?;
         self.owner_repository.store(events).await?;
-        Ok(Response {})
+        Ok(Response {
+            resource_id: *request.resource_id,
+        })
     }
 }
 
