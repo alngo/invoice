@@ -10,12 +10,22 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
+  build_and_test:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+    - name: Cache cargo registry
+      uses: Swatinem/rust-cache@v2
+      with:
+        key: compile_test-cargo-${{ hashFiles('**/Cargo.toml') }}
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install libsqlite3-dev libpq-dev libmysqlclient-dev
     - name: Build
       run: cargo build --verbose
     - name: Run tests

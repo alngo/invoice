@@ -1,8 +1,8 @@
-use diesel::table;
+// @generated automatically by Diesel CLI.
 
-table! {
+diesel::table! {
     owner_events (id) {
-        id -> Int4,
-        event -> Varchar,
+        id -> Integer,
+        event -> Text,
     }
 }
