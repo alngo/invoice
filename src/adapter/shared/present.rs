@@ -1,5 +1,3 @@
-use mockall::mock;
-
 #[allow(dead_code)]
 pub trait Present<D> {
     type ViewModel;

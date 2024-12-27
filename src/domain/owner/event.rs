@@ -1,5 +1,6 @@
 use super::{resource::ResourceId, OwnerId, Price};
 
+#[derive(Debug, Clone)]
 pub enum OwnerEvent {
     OwnerCreated {
         id: OwnerId,

@@ -6,7 +6,7 @@ use crate::{
             create_owner::{self, CreateOwner},
             read_all_resources::{self, ReadAllResources},
             remove_resource::{self, RemoveResource},
-            OwnerRepository, ResourceRepository,
+            OwnerRepository,
         },
         UseCase,
     },
@@ -20,7 +20,7 @@ pub struct Controller<'a, 'c, A, C> {
 
 impl<'a, 'c, A, C> Controller<'a, 'c, A, C>
 where
-    A: OwnerRepository + ResourceRepository,
+    A: OwnerRepository,
     C: Present<create_owner::Result>
         + Present<add_resource::Result>
         + Present<remove_resource::Result>
@@ -50,7 +50,7 @@ where
         description: &str,
         price: Price,
     ) -> <C as Present<add_resource::Result>>::ViewModel {
-        let use_case = AddResource::new(self.repositories, self.repositories);
+        let use_case = AddResource::new(self.repositories);
         let request = add_resource::Request {
             owner_id,
             name,
@@ -66,7 +66,7 @@ where
         owner_id: &OwnerId,
         resource_id: &ResourceId,
     ) -> <C as Present<remove_resource::Result>>::ViewModel {
-        let use_case = RemoveResource::new(self.repositories, self.repositories);
+        let use_case = RemoveResource::new(self.repositories);
         let request = remove_resource::Request {
             owner_id,
             resource_id,

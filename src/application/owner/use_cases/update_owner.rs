@@ -47,9 +47,9 @@ where
             id: *request.id,
             name: request.name.to_string(),
         };
-        let owner = self.owner_repository.find_by_id(*request.id).await?;
+        let owner = self.owner_repository.find_owner_by_id(request.id).await?;
         let events = owner.handle(command)?;
-        self.owner_repository.store(events).await?;
+        self.owner_repository.store(&owner.id(), events).await?;
         Ok(Response { id: *request.id })
     }
 }
@@ -66,9 +66,9 @@ mod owner_use_case_update_owner_tests {
     async fn test_update_owner() {
         let mut owner_repository = MockOwnerRepository::new();
         owner_repository
-            .expect_find_by_id()
+            .expect_find_owner_by_id()
             .returning(|_| Ok(Owner::default()));
-        owner_repository.expect_store().returning(|events| {
+        owner_repository.expect_store().returning(|_, events| {
             assert_eq!(events.len(), 1);
             assert!(matches!(&events[0], OwnerEvent::OwnerUpdated { .. }));
             Ok(())
@@ -86,7 +86,7 @@ mod owner_use_case_update_owner_tests {
     #[tokio::test]
     async fn test_update_owner_error_owner_not_found() {
         let mut owner_repository = MockOwnerRepository::new();
-        owner_repository.expect_find_by_id().returning(|_| {
+        owner_repository.expect_find_owner_by_id().returning(|_| {
             Err(ApplicationError {
                 message: String::from("error"),
             })
@@ -105,9 +105,9 @@ mod owner_use_case_update_owner_tests {
     async fn test_update_owner_error_from_storage() {
         let mut owner_repository = MockOwnerRepository::new();
         owner_repository
-            .expect_find_by_id()
+            .expect_find_owner_by_id()
             .returning(|_| Ok(Owner::default()));
-        owner_repository.expect_store().returning(|_| {
+        owner_repository.expect_store().returning(|_, _| {
             Err(ApplicationError {
                 message: String::from("error"),
             })

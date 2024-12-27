@@ -4,7 +4,7 @@ pub use price::Price;
 
 pub type ResourceId = uuid::Uuid;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Resource {
     id: ResourceId,
     name: String,
@@ -28,5 +28,13 @@ impl Resource {
 
     pub fn name(&self) -> &String {
         &self.name
+    }
+
+    pub fn description(&self) -> &String {
+        &self.description
+    }
+
+    pub fn price(&self) -> &Price {
+        &self.price
     }
 }

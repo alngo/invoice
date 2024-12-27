@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use crate::{
     application::{
-        owner::{repository::OwnerRepository, resource::repository::ResourceRepository},
+        owner::repository::OwnerRepository,
         shared::{error::ApplicationError, use_case::UseCase},
     },
     domain::{
@@ -24,36 +24,33 @@ pub struct Response {
 
 pub type Result = core::result::Result<Response, ApplicationError>;
 
-pub struct AddResource<'a, 'b, A, B> {
+pub struct AddResource<'a, A> {
     owner_repository: &'a A,
-    resource_repository: &'b B,
 }
 
-impl<'a, 'b, A, B> AddResource<'a, 'b, A, B>
+impl<'a, A> AddResource<'a, A>
 where
     A: OwnerRepository,
-    B: ResourceRepository,
 {
-    pub fn new(owner_repository: &'a A, resource_repository: &'b B) -> Self {
-        Self {
-            owner_repository,
-            resource_repository,
-        }
+    pub fn new(owner_repository: &'a A) -> Self {
+        Self { owner_repository }
     }
 }
 
 #[async_trait(?Send)]
-impl<'a, 'b, A, B> UseCase for AddResource<'a, 'b, A, B>
+impl<'a, A> UseCase for AddResource<'a, A>
 where
     A: OwnerRepository,
-    B: ResourceRepository,
 {
     type Request = Request<'a>;
     type Response = Response;
 
     async fn execute(&self, request: Request<'a>) -> Result {
-        let owner = self.owner_repository.find_by_id(*request.owner_id).await?;
-        let id = self.resource_repository.next_id().await?;
+        let owner = self
+            .owner_repository
+            .find_owner_by_id(request.owner_id)
+            .await?;
+        let id = self.owner_repository.next_resource_id().await?;
         let command = OwnerCommand::AddResource {
             id,
             name: request.name.to_string(),
@@ -61,8 +58,7 @@ where
             price: request.price,
         };
         let events = owner.handle(command)?;
-        let id = self.resource_repository.next_id().await?;
-        self.owner_repository.store(events).await?;
+        self.owner_repository.store(owner.id(), events).await?;
         Ok(Response { resource_id: id })
     }
 }
@@ -70,25 +66,19 @@ where
 #[cfg(test)]
 mod owner_use_case_add_resource_tests {
     use super::*;
-    use crate::{
-        application::owner::{
-            repository::MockOwnerRepository, resource::repository::MockResourceRepository,
-        },
-        domain::owner::Owner,
-    };
+    use crate::{application::owner::repository::MockOwnerRepository, domain::owner::Owner};
 
     #[tokio::test]
     async fn add_resource() {
         let mut owner_repository = MockOwnerRepository::new();
         owner_repository
-            .expect_find_by_id()
+            .expect_find_owner_by_id()
             .returning(|_| Ok(Owner::default()));
-        owner_repository.expect_store().returning(|_| Ok(()));
-        let mut resource_repository = MockResourceRepository::new();
-        resource_repository
-            .expect_next_id()
+        owner_repository
+            .expect_next_resource_id()
             .returning(|| Ok(ResourceId::default()));
-        let use_case = AddResource::new(&owner_repository, &resource_repository);
+        owner_repository.expect_store().returning(|_, _| Ok(()));
+        let use_case = AddResource::new(&owner_repository);
 
         let request = Request {
             owner_id: &OwnerId::default(),

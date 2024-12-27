@@ -42,14 +42,14 @@ where
     type Response = Response;
 
     async fn execute(&self, request: Request<'a>) -> Result {
-        let id = self.owner_repository.next_id().await?;
+        let id = self.owner_repository.next_owner_id().await?;
         let command = OwnerCommand::CreateOwner {
             id,
             name: request.name.to_string(),
         };
         let owner = Owner::default();
         let events = owner.handle(command)?;
-        self.owner_repository.store(events).await?;
+        self.owner_repository.store(&id, events).await?;
         Ok(Response {
             name: request.name.to_string(),
         })
@@ -67,13 +67,13 @@ mod owner_use_case_create_owner_tests {
     #[tokio::test]
     async fn test_create_owner() {
         let mut owner_repository = MockOwnerRepository::new();
-        owner_repository.expect_store().returning(|events| {
+        owner_repository.expect_store().returning(|_, events| {
             assert_eq!(events.len(), 1);
             assert!(matches!(&events[0], OwnerEvent::OwnerCreated { .. }));
             Ok(())
         });
         owner_repository
-            .expect_next_id()
+            .expect_next_owner_id()
             .returning(|| Ok(OwnerId::default()));
 
         let use_case = CreateOwner::new(&owner_repository);
@@ -86,9 +86,9 @@ mod owner_use_case_create_owner_tests {
     async fn test_create_owner_error() {
         let mut owner_repository = MockOwnerRepository::new();
         owner_repository
-            .expect_next_id()
+            .expect_next_owner_id()
             .returning(|| Ok(OwnerId::default()));
-        owner_repository.expect_store().returning(|_| {
+        owner_repository.expect_store().returning(|_, _| {
             Err(ApplicationError {
                 message: String::from("error"),
             })

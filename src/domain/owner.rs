@@ -27,6 +27,10 @@ impl Owner {
     pub fn name(&self) -> &String {
         &self.name
     }
+
+    pub fn resources(&self) -> &Vec<Resource> {
+        &self.resources
+    }
 }
 
 impl Entity for Owner {}

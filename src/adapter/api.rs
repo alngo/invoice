@@ -3,7 +3,6 @@ use std::sync::Arc;
 use crate::{
     application::owner::{
         add_resource, create_owner, read_all_resources, remove_resource, OwnerRepository,
-        ResourceRepository,
     },
     domain::owner::OwnerId,
 };
@@ -29,7 +28,7 @@ where
 
 impl<D, P> Api<D, P>
 where
-    D: OwnerRepository + ResourceRepository,
+    D: OwnerRepository,
     P: Present<create_owner::Result>
         + Present<add_resource::Result>
         + Present<remove_resource::Result>
